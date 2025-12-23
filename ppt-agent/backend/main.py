@@ -84,7 +84,7 @@ def analyze_layout(title: str, intent: str, position: int, total: int) -> Layout
         return LayoutType.SECTION_DIVIDER
     if "kpi" in intent_lower or "metric" in intent_lower or "number" in intent_lower or "stats" in intent_lower:
         return LayoutType.KPI_CARDS
-    if "summary" in intent_lower or "compare" in intent_lower:
+    if "summary" in intent_lower or "compare" in intent_lower or "conclusion" in intent_lower:
         return LayoutType.SMALL_SUMMARY
 
     # Default fallback
@@ -152,13 +152,23 @@ async def upload_template(file: UploadFile = File(...)):
 @app.post("/generate-outline", response_model=OutlineResponse)
 def generate_outline(request: PromptRequest):
     system_prompt = """
-    You are an expert presentation designer. Create a presentation outline based on the topic.
+    You are an expert presentation designer. Create a diverse presentation outline based on the topic.
+
+    You MUST aim to use a variety of slide types in your outline.
+    Suggested intents to include (where relevant):
+    - "Introduction" (Cover)
+    - "Section Divider" (to split topics)
+    - "Key Metrics" or "Statistics" (for KPI Cards)
+    - "Detailed Analysis" (Large Text)
+    - "Quick Comparison" or "Summary" (Small Summary)
+    - "Closing" (Thank You)
+
     Return a JSON object with a key "slides" which is a list of objects.
     Each object must have:
     - "title": string
-    - "intent": string (e.g., "Introduction", "Financial KPIs", "Market Analysis", "Conclusion")
+    - "intent": string (e.g., "Introduction", "Key Metrics", "Comparison", etc.)
 
-    Ensure NO duplicate slide concepts. Keep it between 5-8 slides.
+    Ensure NO duplicate slide concepts. Keep it between 6-10 slides.
     """
 
     data = invoke_claude(system_prompt, f"Topic: {request.prompt}")
