@@ -14,6 +14,7 @@ const OutlineEditor = ({ outline, onUpdate, onGenerate }) => {
     { value: 'cover', label: 'Cover' },
     { value: 'thank_you', label: 'Thank You' },
     { value: 'section_divider', label: 'Section Divider' },
+    { value: 'split_dark_left', label: 'Split Dark Left' },
     { value: 'kpi_cards', label: 'KPI Cards' },
     { value: 'large_text', label: 'Large Text' },
     { value: 'small_summary', label: 'Summary' },

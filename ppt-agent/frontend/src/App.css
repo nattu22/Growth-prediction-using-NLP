@@ -4,7 +4,7 @@
   margin: 0;
   padding: 0;
   text-align: left;
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
   overflow: hidden;
   background-color: #f0f0f0;
 }
@@ -21,20 +21,116 @@ body {
   height: 100%;
 }
 
-/* Start/Input Screen specific */
-.container {
+/* --- Creation Overlay (Image 1 Reference) --- */
+.creation-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #111; /* Dark background */
+  color: white;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 100vh;
-  width: 100%;
-  background: white;
+  z-index: 1000;
 }
 
-/* Sidebar (Left) */
+.creation-container {
+  width: 100%;
+  max-width: 700px;
+  padding: 40px;
+}
+
+.creation-header {
+  font-size: 2.5rem;
+  font-weight: 300;
+  margin-bottom: 40px;
+  color: #fff;
+}
+
+.creation-input-group {
+  margin-bottom: 30px;
+}
+
+.creation-label {
+  display: block;
+  font-size: 0.9rem;
+  color: #888;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.creation-input {
+  width: 100%;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid #333;
+  color: white;
+  font-size: 1.5rem;
+  padding: 10px 0;
+  outline: none;
+  transition: border-color 0.3s;
+}
+
+.creation-input:focus {
+  border-bottom-color: #646cff;
+}
+
+.creation-input::placeholder {
+  color: #444;
+}
+
+.creation-actions {
+  display: flex;
+  gap: 15px;
+  margin-top: 40px;
+}
+
+.creation-btn {
+  background: #333;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 30px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.creation-btn:hover {
+  background: #444;
+}
+
+.creation-btn.primary {
+  background: #fff;
+  color: #000;
+  font-weight: 600;
+}
+
+.creation-btn.primary:hover {
+  background: #ddd;
+}
+
+.close-btn {
+  position: absolute;
+  top: 30px;
+  left: 30px;
+  background: none;
+  border: none;
+  color: #666;
+  cursor: pointer;
+}
+.close-btn:hover { color: #fff; }
+
+
+/* --- Editor View --- */
+
+/* Sidebar (Left - Thumbnails) */
 .sidebar {
-  width: 240px;
+  width: 220px;
   background-color: #fff;
   border-right: 1px solid #e0e0e0;
   display: flex;
@@ -45,14 +141,19 @@ body {
 }
 
 .sidebar-header {
-  padding: 1rem;
+  padding: 15px 20px;
   border-bottom: 1px solid #f0f0f0;
-  font-weight: bold;
+  font-weight: 600;
   color: #333;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
 }
 
 .slide-list {
-  padding: 10px;
+  padding: 15px;
   display: flex;
   flex-direction: column;
   gap: 15px;
@@ -68,24 +169,23 @@ body {
 
 .thumbnail-wrapper.active {
   border-color: #646cff;
-  box-shadow: 0 0 0 2px rgba(100, 108, 255, 0.2);
+  box-shadow: 0 0 0 3px rgba(100, 108, 255, 0.15);
 }
 
 .thumbnail-wrapper:hover {
-  border-color: #ccc;
+  border-color: #ddd;
 }
 
 /* Scaling the slide down for thumbnail */
 .thumbnail-scale {
   width: 100%;
-  /* Aspect ratio maintenance container */
   position: relative;
-  /* 16:9 aspect ratio approx */
   padding-bottom: 56.25%;
   background: #fff;
   overflow: hidden;
   border-radius: 4px;
-  pointer-events: none; /* Make thumbnail not interactive */
+  pointer-events: none;
+  border: 1px solid #eee;
 }
 
 .thumbnail-content {
@@ -97,17 +197,18 @@ body {
 
 .slide-number {
   position: absolute;
-  left: -25px;
+  left: -20px;
   top: 50%;
   transform: translateY(-50%);
-  font-size: 0.8rem;
-  color: #888;
+  font-size: 0.75rem;
+  color: #999;
+  font-weight: 500;
 }
 
 /* Main Workspace (Center) */
 .workspace {
   flex: 1;
-  background-color: #e5e5e5; /* darker gray for contrast */
+  background-color: #f3f3f3;
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -115,9 +216,9 @@ body {
 }
 
 .workspace-header {
-  height: 60px;
+  height: 56px;
   background-color: white;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid #e0e0e0;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -135,63 +236,122 @@ body {
 
 /* The actual slide in the workspace */
 .main-slide-wrapper {
-  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  box-shadow: 0 20px 50px rgba(0,0,0,0.15);
   transition: transform 0.2s;
 }
 
-/* Bottom Toolbar */
-.toolbar {
-  height: 60px;
-  background-color: white;
-  border-top: 1px solid #ddd;
+
+/* --- Right Context Sidebar (New - Image 3 Reference) --- */
+.context-sidebar {
+  width: 280px;
+  background-color: #fff;
+  border-left: 1px solid #e0e0e0;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 20px;
+  flex-direction: column;
+  height: 100%;
+  z-index: 10;
 }
 
-.action-btn {
-  background: #fff;
-  border: 1px solid #ccc;
-  padding: 8px 16px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 0.9rem;
+.context-header {
+  padding: 15px 20px;
+  border-bottom: 1px solid #f0f0f0;
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: #555;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.context-content {
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.tool-section {
+  margin-bottom: 30px;
+}
+
+.tool-section h4 {
+  font-size: 0.8rem;
+  color: #888;
+  margin-bottom: 15px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.tool-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.tool-btn {
   display: flex;
+  flex-direction: column;
   align-items: center;
+  justify-content: center;
+  padding: 15px 10px;
+  background: #f8f9fa;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: #555;
+  font-size: 0.8rem;
   gap: 8px;
 }
 
-.action-btn:hover {
-  background: #f5f5f5;
-  border-color: #bbb;
+.tool-btn:hover {
+  background: #fff;
+  border-color: #ccc;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  color: #000;
 }
 
-.primary-btn {
-  background-color: #646cff;
-  color: white;
-  border: none;
-}
-.primary-btn:hover {
-  background-color: #535bf2;
-}
-
-/* Input Section Legacy Styles (kept for 'input' step) */
-.input-section {
-  margin-bottom: 2rem;
-  width: 100%;
-  max-width: 600px;
-}
-
-form {
+/* Floating Toolbar (Mockup) */
+.floating-toolbar {
+  position: absolute;
+  top: 30px; /* Relative to canvas area, adjusted in JS potentially */
+  left: 50%;
+  transform: translateX(-50%);
+  background: white;
+  padding: 8px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
   display: flex;
-  gap: 1rem;
+  gap: 5px;
+  opacity: 0;
+  animation: fadeIn 0.3s forwards;
+  animation-delay: 0.5s;
 }
 
-.prompt-input {
-  flex: 1;
-  padding: 0.8rem;
-  font-size: 1rem;
-  border: 1px solid #ccc;
+@keyframes fadeIn {
+  to { opacity: 1; }
+}
+
+.float-btn {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
   border-radius: 4px;
+  cursor: pointer;
+  color: #555;
+}
+.float-btn:hover { background: #f0f0f0; }
+
+
+/* --- Legacy overrides --- */
+.container {
+  /* Used for fallback */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  width: 100%;
+  background: white;
 }

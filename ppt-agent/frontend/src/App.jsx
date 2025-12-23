@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import axios from 'axios'
 import html2canvas from 'html2canvas'
-import { Plus, Download, RefreshCw, Layout, Edit, Image as ImageIcon, ArrowLeft } from 'lucide-react'
+import { Plus, Download, RefreshCw, Layout, Edit, Image as ImageIcon, ArrowLeft, Type, Grid, Palette, Settings, X, MoreHorizontal, AlignLeft, Bold, Italic } from 'lucide-react'
 import Dashboard from './Dashboard'
 import OutlineEditor from './OutlineEditor'
 import SlideRenderer from './SlideRenderer'
@@ -112,13 +112,63 @@ function App() {
     )
   }
 
+  if (step === 'input') {
+      return (
+        <div className="creation-overlay">
+            <button className="close-btn" onClick={() => setStep('dashboard')}>
+                <X size={32} />
+            </button>
+
+            <div className="creation-container">
+                <h1 className="creation-header">Create new presentation</h1>
+
+                <form onSubmit={handleGenerateOutline}>
+                    <div className="creation-input-group">
+                        <label className="creation-label">Make it look like...</label>
+                        <div style={{display:'flex', gap:'10px', overflowX:'auto', paddingBottom:'10px'}}>
+                             {/* Mock Themes */}
+                             {['Modern', 'Classic', 'Dark', 'Vibrant'].map(theme => (
+                                 <button type="button" key={theme} style={{
+                                     padding:'8px 16px', borderRadius:'20px',
+                                     border:'1px solid #444', background: 'transparent', color:'#fff', cursor:'pointer'
+                                 }}>{theme}</button>
+                             ))}
+                        </div>
+                    </div>
+
+                    <div className="creation-input-group">
+                        <label className="creation-label">About...</label>
+                        <input
+                            type="text"
+                            className="creation-input"
+                            value={prompt}
+                            onChange={(e) => setPrompt(e.target.value)}
+                            placeholder="e.g. Q3 Marketing Strategy"
+                            autoFocus
+                        />
+                    </div>
+
+                    {templateId && <p style={{color: '#646cff', fontSize: '0.9rem'}}>Using uploaded template.</p>}
+
+                    <div className="creation-actions">
+                        <button type="submit" className="creation-btn primary" disabled={loading || !prompt}>
+                            {loading ? 'Analyzing...' : 'Create Presentation'}
+                        </button>
+                        <button type="button" className="creation-btn" onClick={() => setStep('dashboard')}>Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+      )
+  }
+
   if (step === 'slides') {
     return (
       <div className="app-container">
         {/* Left Sidebar */}
         <div className="sidebar">
-          <div className="sidebar-header" onClick={() => setStep('dashboard')} style={{cursor: 'pointer', display: 'flex', alignItems: 'center'}}>
-            <ArrowLeft size={16} style={{marginRight: '10px'}}/> PPT Agent
+          <div className="sidebar-header" onClick={() => setStep('dashboard')}>
+            <ArrowLeft size={16} /> PPT Agent
           </div>
           <div className="slide-list">
             {slides.map((slide, index) => (
@@ -136,8 +186,8 @@ function App() {
               </div>
             ))}
 
-            <div style={{ padding: '10px', textAlign: 'center', color: '#888', border: '1px dashed #ccc', borderRadius: '4px' }}>
-              <Plus size={20} style={{ display: 'block', margin: '0 auto' }} />
+            <div style={{ padding: '15px', textAlign: 'center', color: '#888', border: '1px dashed #ccc', borderRadius: '4px', cursor: 'pointer', fontSize:'0.8rem' }}>
+              <Plus size={16} style={{ display: 'block', margin: '0 auto 5px' }} />
               Add Slide
             </div>
           </div>
@@ -161,76 +211,68 @@ function App() {
             {slides[activeSlideIndex] && (
               <div className="main-slide-wrapper">
                  <SlideRenderer slide={slides[activeSlideIndex]} id="main-slide-render" />
+
+                 {/* Floating Toolbar Mockup */}
+                 <div className="floating-toolbar">
+                     <button className="float-btn"><Bold size={16} /></button>
+                     <button className="float-btn"><Italic size={16} /></button>
+                     <button className="float-btn"><AlignLeft size={16} /></button>
+                     <div style={{width:'1px', height:'16px', background:'#ddd', margin:'0 4px'}}></div>
+                     <button className="float-btn"><Settings size={16} /></button>
+                 </div>
               </div>
             )}
           </div>
+        </div>
 
-          {/* Bottom Toolbar */}
-          <div className="toolbar">
-            <button className="action-btn">
-              <Layout size={16} /> Layouts
-            </button>
-             <button className="action-btn">
-              <RefreshCw size={16} /> Rewrite
-            </button>
-            <button className="action-btn">
-              <ImageIcon size={16} /> Change Image
-            </button>
-            <button className="action-btn">
-              <Edit size={16} /> Edit Text
-            </button>
-          </div>
+        {/* Right Context Sidebar */}
+        <div className="context-sidebar">
+            <div className="context-header">Design Tools</div>
+            <div className="context-content">
+                <div className="tool-section">
+                    <h4>Layouts</h4>
+                    <div className="tool-grid">
+                        <div className="tool-btn"><Layout size={20} /> Smart</div>
+                        <div className="tool-btn"><Grid size={20} /> Grid</div>
+                    </div>
+                </div>
+
+                <div className="tool-section">
+                    <h4>Content</h4>
+                    <div className="tool-grid">
+                        <div className="tool-btn"><Type size={20} /> Text</div>
+                        <div className="tool-btn"><ImageIcon size={20} /> Image</div>
+                        <div className="tool-btn"><Palette size={20} /> Color</div>
+                        <div className="tool-btn"><RefreshCw size={20} /> Rewrite</div>
+                    </div>
+                </div>
+
+                <div className="tool-section">
+                    <h4>Slide Note</h4>
+                    <div style={{fontSize:'0.8rem', color:'#666', lineHeight:'1.5'}}>
+                        Use this area to add speaker notes or AI instructions for this specific slide.
+                    </div>
+                </div>
+            </div>
         </div>
       </div>
     )
   }
 
-  // Input & Outline (Modal-like or dedicated pages)
-  return (
-    <div className="container">
-       <button className="back-home-btn" onClick={() => setStep('dashboard')} style={{position: 'absolute', top: '20px', left: '20px', border: 'none', background: 'transparent', cursor: 'pointer'}}>
-          <ArrowLeft size={24} color="#333" />
-       </button>
+  // Outline Fallback
+  if (step === 'outline') {
+      return (
+        <div className="container">
+             <OutlineEditor
+                outline={outline}
+                onUpdate={setOutline}
+                onGenerate={handleGenerateSlides}
+             />
+        </div>
+      )
+  }
 
-      <header className="app-header">
-        <h1>PPT Agent</h1>
-        <p>AI-Powered Presentation Generator</p>
-      </header>
-
-      <main>
-        {step === 'input' && (
-          <div className="input-section">
-
-            <form onSubmit={handleGenerateOutline} style={{ marginTop: '20px' }}>
-              <input
-                type="text"
-                value={prompt}
-                onChange={(e) => setPrompt(e.target.value)}
-                placeholder="Enter a topic (e.g., 'Q3 Financial Results')"
-                required
-                className="prompt-input"
-              />
-              <button type="submit" disabled={loading} className="generate-btn">
-                {loading ? 'Analyzing...' : 'Create Outline'}
-              </button>
-            </form>
-            {templateId && <p style={{color: '#646cff', marginTop: '10px', fontSize: '0.9rem'}}>Using uploaded template.</p>}
-          </div>
-        )}
-
-        {step === 'outline' && (
-          <OutlineEditor
-            outline={outline}
-            onUpdate={setOutline}
-            onGenerate={handleGenerateSlides}
-          />
-        )}
-
-        {loading && <div className="loading">Working...</div>}
-        {error && <div className="error-message">{error}</div>}
-      </main>
-    </div>
-  )
+  return <div>Loading...</div>
 }
 
 export default App

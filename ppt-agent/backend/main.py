@@ -32,6 +32,7 @@ class LayoutType(str, Enum):
     COVER = "cover"
     THANK_YOU = "thank_you"
     SECTION_DIVIDER = "section_divider"
+    SPLIT_DARK_LEFT = "split_dark_left"
     KPI_CARDS = "kpi_cards"
     LARGE_TEXT = "large_text"
     SMALL_SUMMARY = "small_summary"
@@ -84,6 +85,8 @@ def analyze_layout(title: str, intent: str, position: int, total: int) -> Layout
         return LayoutType.THANK_YOU
     if "section" in intent_lower or "divider" in intent_lower:
         return LayoutType.SECTION_DIVIDER
+    if "split" in intent_lower or "detail" in intent_lower or "agenda" in intent_lower:
+        return LayoutType.SPLIT_DARK_LEFT
     if "kpi" in intent_lower or "metric" in intent_lower or "number" in intent_lower or "stats" in intent_lower:
         return LayoutType.KPI_CARDS
     if "compare" in intent_lower or "table" in intent_lower or "schedule" in intent_lower or "pricing" in intent_lower:
@@ -219,6 +222,8 @@ def generate_slide_content(request: SlideGenerationRequest):
         structure_hint = "Return JSON with 'chart': {'type': 'bar', 'data': [{'label': 'Q1', 'value': 100}, {'label': 'Q2', 'value': 150}]}. Ensure values are numeric."
     elif request.layout == LayoutType.COVER:
          structure_hint = "Return JSON with 'subtitle': '...'"
+    elif request.layout == LayoutType.SPLIT_DARK_LEFT:
+        structure_hint = "Return JSON with 'subtitle': '...' and 'bullet_points': ['...']. This is a split slide with a dark header on left."
     else:
         structure_hint = "Return JSON with 'bullet_points': ['...']. Keep points concise (max 15 words each)."
 
