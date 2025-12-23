@@ -1,0 +1,90 @@
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.app-header {
+  margin-bottom: 2rem;
+}
+
+.input-section {
+  margin-bottom: 2rem;
+  width: 100%;
+  max-width: 600px;
+}
+
+form {
+  display: flex;
+  gap: 1rem;
+}
+
+.prompt-input {
+  flex: 1;
+  padding: 0.8rem;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.generate-btn {
+  padding: 0.8rem 1.5rem;
+  font-size: 1rem;
+  background-color: #646cff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.generate-btn:disabled {
+  background-color: #999;
+  cursor: not-allowed;
+}
+
+.error-message {
+  color: red;
+  margin-bottom: 1rem;
+}
+
+.slide-preview {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 2rem;
+  width: 100%;
+  max-width: 800px;
+  background-color: #f9f9f9;
+  text-align: left;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.slide-content h2 {
+  color: #333;
+  margin-top: 0;
+}
+
+.slide-content ul {
+  padding-left: 1.5rem;
+}
+
+.slide-content li {
+  margin-bottom: 0.5rem;
+  color: #555;
+}
+
+.speaker-notes {
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px dashed #ccc;
+  font-size: 0.9rem;
+  color: #666;
+}
