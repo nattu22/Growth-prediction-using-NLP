@@ -203,7 +203,7 @@ def generate_slide_content(request: SlideGenerationRequest):
 
     # Customize prompt based on layout
     if request.layout == LayoutType.KPI_CARDS:
-        structure_hint = "Return JSON with 'kpis': [{'label': 'Revenue', 'value': '$10M'}, ...]"
+        structure_hint = "Return JSON with 'kpis': [{'label': 'Revenue', 'value': '$10M', 'icon': 'dollar'}, ...]. Suggested icons: dollar, users, trend, chart, globe, alert, check."
     elif request.layout == LayoutType.COVER:
          structure_hint = "Return JSON with 'subtitle': '...'"
     else:
@@ -221,7 +221,7 @@ def generate_slide_content(request: SlideGenerationRequest):
     if data is None:
         # Mock Data based on layout
         if request.layout == LayoutType.KPI_CARDS:
-            content = {"kpis": [{"label": "Metric 1", "value": "100"}, {"label": "Metric 2", "value": "50%"}]}
+            content = {"kpis": [{"label": "Metric 1", "value": "100", "icon": "check"}, {"label": "Metric 2", "value": "50%", "icon": "trend"}]}
         elif request.layout == LayoutType.COVER:
             content = {"subtitle": "A Deep Dive"}
         else:

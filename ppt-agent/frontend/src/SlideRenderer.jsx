@@ -1,4 +1,16 @@
 import React from 'react';
+import { TrendingUp, DollarSign, Users, Globe, AlertCircle, CheckCircle, BarChart2, Activity } from 'lucide-react';
+
+const IconMap = {
+  trend: TrendingUp,
+  dollar: DollarSign,
+  users: Users,
+  globe: Globe,
+  alert: AlertCircle,
+  check: CheckCircle,
+  chart: BarChart2,
+  default: Activity
+};
 
 const SlideRenderer = ({ slide, id }) => {
   const { title, layout, content, template_url } = slide;
@@ -14,10 +26,12 @@ const SlideRenderer = ({ slide, id }) => {
     position: 'relative',
     color: '#333',
     backgroundColor: 'white',
-    margin: '0 auto'
+    margin: '0 auto',
+    boxSizing: 'border-box',
+    // The "Left Line" theme element
+    borderLeft: '12px solid #646cff'
   };
 
-  // Render content based on layout
   const renderContent = () => {
     switch (layout) {
       case 'cover':
@@ -32,16 +46,22 @@ const SlideRenderer = ({ slide, id }) => {
           <div>
             <h2>{title}</h2>
             <div style={{ display: 'flex', gap: '20px', marginTop: '40px', justifyContent: 'center' }}>
-              {content.kpis && content.kpis.map((kpi, i) => (
-                <div key={i} style={{
-                  border: '1px solid #eee', padding: '20px', borderRadius: '8px',
-                  backgroundColor: '#f9f9f9', width: '150px', textAlign: 'center',
-                  boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-                }}>
-                  <div style={{ fontSize: '2em', fontWeight: 'bold', color: '#646cff' }}>{kpi.value}</div>
-                  <div style={{ color: '#555' }}>{kpi.label}</div>
-                </div>
-              ))}
+              {content.kpis && content.kpis.map((kpi, i) => {
+                const IconComponent = IconMap[kpi.icon?.toLowerCase()] || IconMap.default;
+                return (
+                  <div key={i} style={{
+                    border: '1px solid #eee', padding: '20px', borderRadius: '8px',
+                    backgroundColor: '#f9f9f9', width: '180px', textAlign: 'center',
+                    boxShadow: '0 2px 4px rgba(0,0,0,0.1)', display: 'flex', flexDirection: 'column', alignItems: 'center'
+                  }}>
+                    <div style={{ marginBottom: '10px', color: '#646cff' }}>
+                        <IconComponent size={32} />
+                    </div>
+                    <div style={{ fontSize: '2em', fontWeight: 'bold', color: '#333' }}>{kpi.value}</div>
+                    <div style={{ color: '#555', fontSize: '0.9em', marginTop: '5px' }}>{kpi.label}</div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         );
@@ -54,7 +74,7 @@ const SlideRenderer = ({ slide, id }) => {
           );
       case 'section_divider':
         return (
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', backgroundColor: '#646cff', color: 'white' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', backgroundColor: '#646cff', color: 'white', marginLeft: '-40px', width: '840px' }}>
                  <h1 style={{ fontSize: '3em' }}>{title}</h1>
             </div>
         )
