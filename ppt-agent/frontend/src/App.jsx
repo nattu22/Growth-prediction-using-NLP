@@ -1,22 +1,44 @@
 import { useState } from 'react'
 import axios from 'axios'
 import html2canvas from 'html2canvas'
-import TemplateUpload from './TemplateUpload'
+import { Plus, Download, RefreshCw, Layout, Edit, Image as ImageIcon, ArrowLeft } from 'lucide-react'
+import Dashboard from './Dashboard'
 import OutlineEditor from './OutlineEditor'
 import SlideRenderer from './SlideRenderer'
 import './App.css'
 
 function App() {
-  const [step, setStep] = useState('input') // input, outline, slides
+  const [step, setStep] = useState('dashboard') // dashboard, input, outline, slides
   const [prompt, setPrompt] = useState('')
   const [templateId, setTemplateId] = useState(null)
   const [outline, setOutline] = useState([])
   const [slides, setSlides] = useState([])
+  const [activeSlideIndex, setActiveSlideIndex] = useState(0)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
-  const [images, setImages] = useState({}) // Store generated images keyed by slide index
 
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+
+  const handleTemplateUpload = async (file) => {
+    if (!file) return;
+    const formData = new FormData();
+    formData.append('file', file);
+
+    // Optimistic UI update or simple alert
+    console.log("Uploading template...")
+
+    try {
+        const response = await axios.post(`${API_URL}/upload-template`, formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        setTemplateId(response.data.template_id);
+        alert("Template uploaded successfully! Now write a prompt.");
+        setStep('input');
+    } catch (err) {
+        console.error("Upload failed", err);
+        setError("Failed to upload template");
+    }
+  }
 
   // Step 1: Generate Outline
   const handleGenerateOutline = async (e) => {
@@ -42,8 +64,6 @@ function App() {
     setSlides([]) // Reset
 
     try {
-      // Fetch all slides in parallel (or sequential if rate limited)
-      // For simplicity/safety, let's do Promise.all
       const promises = finalOutline.map(item =>
         axios.post(`${API_URL}/generate-slide-content`, {
           title: item.title,
@@ -55,6 +75,7 @@ function App() {
 
       const responses = await Promise.all(promises)
       setSlides(responses.map(r => r.data))
+      setActiveSlideIndex(0)
       setStep('slides')
     } catch (err) {
       console.error(err)
@@ -64,22 +85,113 @@ function App() {
     }
   }
 
-  // Generate Image for a slide
-  const generateImage = async (index) => {
-    const element = document.getElementById(`slide-${index}`)
+  // Generate Image for current slide
+  const handleDownloadImage = async () => {
+    const element = document.getElementById(`main-slide-render`)
     if (element) {
       try {
         const canvas = await html2canvas(element)
-        const imgData = canvas.toDataURL("image/png")
-        setImages(prev => ({ ...prev, [index]: imgData }))
+        const link = document.createElement('a')
+        link.download = `slide-${activeSlideIndex + 1}.png`
+        link.href = canvas.toDataURL()
+        link.click()
       } catch (err) {
         console.error("Image generation failed", err)
       }
     }
   }
 
+  // --- Render Logic ---
+
+  if (step === 'dashboard') {
+    return (
+        <Dashboard
+            onGenerateClick={() => setStep('input')}
+            onTemplateUpload={handleTemplateUpload}
+        />
+    )
+  }
+
+  if (step === 'slides') {
+    return (
+      <div className="app-container">
+        {/* Left Sidebar */}
+        <div className="sidebar">
+          <div className="sidebar-header" onClick={() => setStep('dashboard')} style={{cursor: 'pointer', display: 'flex', alignItems: 'center'}}>
+            <ArrowLeft size={16} style={{marginRight: '10px'}}/> PPT Agent
+          </div>
+          <div className="slide-list">
+            {slides.map((slide, index) => (
+              <div
+                key={index}
+                className={`thumbnail-wrapper ${index === activeSlideIndex ? 'active' : ''}`}
+                onClick={() => setActiveSlideIndex(index)}
+              >
+                <div className="slide-number">{index + 1}</div>
+                <div className="thumbnail-scale">
+                  <div className="thumbnail-content" style={{ transform: 'scale(0.25)', width: '800px', height: '450px' }}>
+                     <SlideRenderer slide={slide} id={`thumb-${index}`} />
+                  </div>
+                </div>
+              </div>
+            ))}
+
+            <div style={{ padding: '10px', textAlign: 'center', color: '#888', border: '1px dashed #ccc', borderRadius: '4px' }}>
+              <Plus size={20} style={{ display: 'block', margin: '0 auto' }} />
+              Add Slide
+            </div>
+          </div>
+        </div>
+
+        {/* Main Workspace */}
+        <div className="workspace">
+          <div className="workspace-header">
+             <div style={{display: 'flex', alignItems: 'center', gap: '10px'}}>
+                <button className="icon-btn" onClick={() => setStep('outline')}><ArrowLeft size={16} /></button>
+                <h3>{prompt || "Untitled Presentation"}</h3>
+             </div>
+             <div style={{ display: 'flex', gap: '10px' }}>
+                <button className="action-btn primary-btn" onClick={handleDownloadImage}>
+                  <Download size={16} /> Export
+                </button>
+             </div>
+          </div>
+
+          <div className="canvas-area">
+            {slides[activeSlideIndex] && (
+              <div className="main-slide-wrapper">
+                 <SlideRenderer slide={slides[activeSlideIndex]} id="main-slide-render" />
+              </div>
+            )}
+          </div>
+
+          {/* Bottom Toolbar */}
+          <div className="toolbar">
+            <button className="action-btn">
+              <Layout size={16} /> Layouts
+            </button>
+             <button className="action-btn">
+              <RefreshCw size={16} /> Rewrite
+            </button>
+            <button className="action-btn">
+              <ImageIcon size={16} /> Change Image
+            </button>
+            <button className="action-btn">
+              <Edit size={16} /> Edit Text
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Input & Outline (Modal-like or dedicated pages)
   return (
     <div className="container">
+       <button className="back-home-btn" onClick={() => setStep('dashboard')} style={{position: 'absolute', top: '20px', left: '20px', border: 'none', background: 'transparent', cursor: 'pointer'}}>
+          <ArrowLeft size={24} color="#333" />
+       </button>
+
       <header className="app-header">
         <h1>PPT Agent</h1>
         <p>AI-Powered Presentation Generator</p>
@@ -88,8 +200,6 @@ function App() {
       <main>
         {step === 'input' && (
           <div className="input-section">
-            <TemplateUpload onUpload={setTemplateId} />
-            {templateId && <p style={{color: 'green'}}>Template loaded!</p>}
 
             <form onSubmit={handleGenerateOutline} style={{ marginTop: '20px' }}>
               <input
@@ -104,6 +214,7 @@ function App() {
                 {loading ? 'Analyzing...' : 'Create Outline'}
               </button>
             </form>
+            {templateId && <p style={{color: '#646cff', marginTop: '10px', fontSize: '0.9rem'}}>Using uploaded template.</p>}
           </div>
         )}
 
@@ -117,42 +228,6 @@ function App() {
 
         {loading && <div className="loading">Working...</div>}
         {error && <div className="error-message">{error}</div>}
-
-        {step === 'slides' && (
-          <div className="slides-view">
-             <h2>Your Presentation</h2>
-             <button onClick={() => setStep('input')}>Start Over</button>
-
-             <div className="slides-grid">
-               {slides.map((slide, index) => (
-                 <div key={index} className="slide-wrapper" style={{ margin: '40px 0' }}>
-                   {/* The actual HTML Slide */}
-                   <SlideRenderer slide={slide} id={`slide-${index}`} />
-
-                   {/* Controls */}
-                   <div style={{ marginTop: '10px' }}>
-                     <button onClick={() => generateImage(index)}>Capture as Image</button>
-                   </div>
-
-                   {/* Display Captured Image */}
-                   {images[index] && (
-                     <div style={{ marginTop: '10px' }}>
-                       <strong>Captured Image:</strong>
-                       <br/>
-                       <img src={images[index]} alt="Slide Capture" style={{ width: '400px', border: '1px solid #333' }} />
-                     </div>
-                   )}
-
-                   {slide.notes && (
-                     <div className="speaker-notes">
-                       <strong>Notes:</strong> {slide.notes}
-                     </div>
-                   )}
-                 </div>
-               ))}
-             </div>
-          </div>
-        )}
       </main>
     </div>
   )

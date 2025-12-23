@@ -1,22 +1,182 @@
 #root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  text-align: left;
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  overflow: hidden;
+  background-color: #f0f0f0;
 }
 
+body {
+  margin: 0;
+  padding: 0;
+}
+
+/* General Layout */
+.app-container {
+  display: flex;
+  width: 100%;
+  height: 100%;
+}
+
+/* Start/Input Screen specific */
 .container {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   min-height: 100vh;
+  width: 100%;
+  background: white;
 }
 
-.app-header {
-  margin-bottom: 2rem;
+/* Sidebar (Left) */
+.sidebar {
+  width: 240px;
+  background-color: #fff;
+  border-right: 1px solid #e0e0e0;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow-y: auto;
+  z-index: 10;
 }
 
+.sidebar-header {
+  padding: 1rem;
+  border-bottom: 1px solid #f0f0f0;
+  font-weight: bold;
+  color: #333;
+}
+
+.slide-list {
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.thumbnail-wrapper {
+  cursor: pointer;
+  position: relative;
+  border: 2px solid transparent;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.thumbnail-wrapper.active {
+  border-color: #646cff;
+  box-shadow: 0 0 0 2px rgba(100, 108, 255, 0.2);
+}
+
+.thumbnail-wrapper:hover {
+  border-color: #ccc;
+}
+
+/* Scaling the slide down for thumbnail */
+.thumbnail-scale {
+  width: 100%;
+  /* Aspect ratio maintenance container */
+  position: relative;
+  /* 16:9 aspect ratio approx */
+  padding-bottom: 56.25%;
+  background: #fff;
+  overflow: hidden;
+  border-radius: 4px;
+  pointer-events: none; /* Make thumbnail not interactive */
+}
+
+.thumbnail-content {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-origin: top left;
+}
+
+.slide-number {
+  position: absolute;
+  left: -25px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.8rem;
+  color: #888;
+}
+
+/* Main Workspace (Center) */
+.workspace {
+  flex: 1;
+  background-color: #e5e5e5; /* darker gray for contrast */
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  position: relative;
+}
+
+.workspace-header {
+  height: 60px;
+  background-color: white;
+  border-bottom: 1px solid #ddd;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+}
+
+.canvas-area {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: auto;
+  padding: 40px;
+}
+
+/* The actual slide in the workspace */
+.main-slide-wrapper {
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  transition: transform 0.2s;
+}
+
+/* Bottom Toolbar */
+.toolbar {
+  height: 60px;
+  background-color: white;
+  border-top: 1px solid #ddd;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+}
+
+.action-btn {
+  background: #fff;
+  border: 1px solid #ccc;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.action-btn:hover {
+  background: #f5f5f5;
+  border-color: #bbb;
+}
+
+.primary-btn {
+  background-color: #646cff;
+  color: white;
+  border: none;
+}
+.primary-btn:hover {
+  background-color: #535bf2;
+}
+
+/* Input Section Legacy Styles (kept for 'input' step) */
 .input-section {
   margin-bottom: 2rem;
   width: 100%;
@@ -34,57 +194,4 @@ form {
   font-size: 1rem;
   border: 1px solid #ccc;
   border-radius: 4px;
-}
-
-.generate-btn {
-  padding: 0.8rem 1.5rem;
-  font-size: 1rem;
-  background-color: #646cff;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.generate-btn:disabled {
-  background-color: #999;
-  cursor: not-allowed;
-}
-
-.error-message {
-  color: red;
-  margin-bottom: 1rem;
-}
-
-.slide-preview {
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 2rem;
-  width: 100%;
-  max-width: 800px;
-  background-color: #f9f9f9;
-  text-align: left;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-}
-
-.slide-content h2 {
-  color: #333;
-  margin-top: 0;
-}
-
-.slide-content ul {
-  padding-left: 1.5rem;
-}
-
-.slide-content li {
-  margin-bottom: 0.5rem;
-  color: #555;
-}
-
-.speaker-notes {
-  margin-top: 2rem;
-  padding-top: 1rem;
-  border-top: 1px dashed #ccc;
-  font-size: 0.9rem;
-  color: #666;
 }
