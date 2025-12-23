@@ -65,6 +65,69 @@ const SlideRenderer = ({ slide, id }) => {
             </div>
           </div>
         );
+      case 'table':
+        return (
+            <div>
+                <h2>{title}</h2>
+                <div style={{marginTop: '30px', overflowX: 'auto'}}>
+                    <table style={{width: '100%', borderCollapse: 'collapse'}}>
+                        <thead>
+                            <tr style={{backgroundColor: '#f1f3f5', borderBottom: '2px solid #ddd'}}>
+                                {content.table?.columns?.map((col, i) => (
+                                    <th key={i} style={{padding: '12px', textAlign: 'left', fontWeight: '600', color: '#444'}}>{col}</th>
+                                ))}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {content.table?.rows?.map((row, rI) => (
+                                <tr key={rI} style={{borderBottom: '1px solid #eee'}}>
+                                    {row.map((cell, cI) => (
+                                        <td key={cI} style={{padding: '12px', color: '#555'}}>{cell}</td>
+                                    ))}
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        );
+      case 'chart':
+        // Simple CSS Bar Chart
+        const data = content.chart?.data || [];
+        const maxValue = Math.max(...data.map(d => Number(d.value) || 0), 1); // Avoid div by zero
+        const CHART_HEIGHT = 200;
+
+        return (
+            <div>
+                <h2>{title}</h2>
+                <div style={{
+                    display: 'flex',
+                    alignItems: 'flex-end',
+                    justifyContent: 'space-around',
+                    height: `${CHART_HEIGHT + 60}px`,
+                    marginTop: '60px',
+                    padding: '0 40px',
+                    borderBottom: '1px solid #ccc'
+                }}>
+                    {data.map((d, i) => {
+                        const barHeight = maxValue ? (d.value / maxValue) * CHART_HEIGHT : 0;
+                        return (
+                            <div key={i} style={{display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%'}}>
+                                <div style={{
+                                    height: `${barHeight}px`,
+                                    width: '40px',
+                                    backgroundColor: '#646cff',
+                                    borderRadius: '4px 4px 0 0',
+                                    transition: 'height 0.5s ease'
+                                }}></div>
+                                <div style={{marginTop: '10px', fontSize: '0.9em', fontWeight: 'bold'}}>{d.label}</div>
+                                <div style={{fontSize: '0.8em', color: '#666'}}>{d.value}</div>
+                            </div>
+                        )
+                    })}
+                </div>
+            </div>
+        );
       case 'thank_you':
         return (
             <div style={{ textAlign: 'center', marginTop: '150px' }}>

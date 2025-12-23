@@ -35,6 +35,8 @@ class LayoutType(str, Enum):
     KPI_CARDS = "kpi_cards"
     LARGE_TEXT = "large_text"
     SMALL_SUMMARY = "small_summary"
+    TABLE = "table"
+    CHART = "chart"
 
 class PromptRequest(BaseModel):
     prompt: str
@@ -84,7 +86,11 @@ def analyze_layout(title: str, intent: str, position: int, total: int) -> Layout
         return LayoutType.SECTION_DIVIDER
     if "kpi" in intent_lower or "metric" in intent_lower or "number" in intent_lower or "stats" in intent_lower:
         return LayoutType.KPI_CARDS
-    if "summary" in intent_lower or "compare" in intent_lower or "conclusion" in intent_lower:
+    if "compare" in intent_lower or "table" in intent_lower or "schedule" in intent_lower or "pricing" in intent_lower:
+        return LayoutType.TABLE
+    if "trend" in intent_lower or "chart" in intent_lower or "growth" in intent_lower or "breakdown" in intent_lower or "graph" in intent_lower:
+        return LayoutType.CHART
+    if "summary" in intent_lower or "conclusion" in intent_lower:
         return LayoutType.SMALL_SUMMARY
 
     # Default fallback
@@ -160,13 +166,15 @@ def generate_outline(request: PromptRequest):
     - "Section Divider" (to split topics)
     - "Key Metrics" or "Statistics" (for KPI Cards)
     - "Detailed Analysis" (Large Text)
-    - "Quick Comparison" or "Summary" (Small Summary)
+    - "Comparison" or "Pricing" (Table)
+    - "Trends" or "Growth" (Chart)
+    - "Summary" (Small Summary)
     - "Closing" (Thank You)
 
     Return a JSON object with a key "slides" which is a list of objects.
     Each object must have:
     - "title": string
-    - "intent": string (e.g., "Introduction", "Key Metrics", "Comparison", etc.)
+    - "intent": string (e.g., "Introduction", "Key Metrics", "Comparison", "Growth Trend", etc.)
 
     Ensure NO duplicate slide concepts. Keep it between 6-10 slides.
     """
@@ -178,7 +186,8 @@ def generate_outline(request: PromptRequest):
         slides_data = [
             {"title": f"{request.prompt} - Overview", "intent": "Introduction"},
             {"title": "Key Metrics", "intent": "Financial KPIs"},
-            {"title": "Market Trends", "intent": "Large content"},
+            {"title": "Market Trends", "intent": "Growth Trend Chart"},
+            {"title": "Feature Comparison", "intent": "Product Table Comparison"},
             {"title": "Summary", "intent": "Quick comparison summary"},
             {"title": "Thank You", "intent": "Closing"}
         ]
@@ -204,16 +213,20 @@ def generate_slide_content(request: SlideGenerationRequest):
     # Customize prompt based on layout
     if request.layout == LayoutType.KPI_CARDS:
         structure_hint = "Return JSON with 'kpis': [{'label': 'Revenue', 'value': '$10M', 'icon': 'dollar'}, ...]. Suggested icons: dollar, users, trend, chart, globe, alert, check."
+    elif request.layout == LayoutType.TABLE:
+        structure_hint = "Return JSON with 'table': {'columns': ['Col1', 'Col2'], 'rows': [['Row1Data1', 'Row1Data2'], ['Row2Data1', 'Row2Data2']]}. Keep it to 3-4 columns and 4-5 rows max."
+    elif request.layout == LayoutType.CHART:
+        structure_hint = "Return JSON with 'chart': {'type': 'bar', 'data': [{'label': 'Q1', 'value': 100}, {'label': 'Q2', 'value': 150}]}. Ensure values are numeric."
     elif request.layout == LayoutType.COVER:
          structure_hint = "Return JSON with 'subtitle': '...'"
     else:
-        structure_hint = "Return JSON with 'bullet_points': ['...']"
+        structure_hint = "Return JSON with 'bullet_points': ['...']. Keep points concise (max 15 words each)."
 
     system_prompt = f"""
     Generate content for a slide with Title: "{request.title}" and Layout: "{request.layout}".
     Context: {request.context}.
     {structure_hint}
-    Also include 'notes' key for speaker notes.
+    Also include 'notes' key for speaker notes (max 50 words).
     """
 
     data = invoke_claude(system_prompt, "Generate content.")
@@ -222,6 +235,10 @@ def generate_slide_content(request: SlideGenerationRequest):
         # Mock Data based on layout
         if request.layout == LayoutType.KPI_CARDS:
             content = {"kpis": [{"label": "Metric 1", "value": "100", "icon": "check"}, {"label": "Metric 2", "value": "50%", "icon": "trend"}]}
+        elif request.layout == LayoutType.TABLE:
+             content = {"table": {"columns": ["Feature", "Plan A", "Plan B"], "rows": [["Users", "10", "Unlimited"], ["Storage", "10GB", "1TB"], ["Support", "Email", "24/7"]]}}
+        elif request.layout == LayoutType.CHART:
+             content = {"chart": {"type": "bar", "data": [{"label": "Jan", "value": 30}, {"label": "Feb", "value": 45}, {"label": "Mar", "value": 60}]}}
         elif request.layout == LayoutType.COVER:
             content = {"subtitle": "A Deep Dive"}
         else:

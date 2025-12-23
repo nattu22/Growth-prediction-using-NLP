@@ -16,7 +16,9 @@ const OutlineEditor = ({ outline, onUpdate, onGenerate }) => {
     { value: 'section_divider', label: 'Section Divider' },
     { value: 'kpi_cards', label: 'KPI Cards' },
     { value: 'large_text', label: 'Large Text' },
-    { value: 'small_summary', label: 'Summary' }
+    { value: 'small_summary', label: 'Summary' },
+    { value: 'table', label: 'Table' },
+    { value: 'chart', label: 'Chart' }
   ];
 
   return (
